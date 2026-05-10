@@ -1,214 +1,275 @@
-# Radio Temporal - Proyecto
+# Radio Temporal — Proyecto Final DAW
+
+Aplicación web tipo "radio temporal" basada en un **mapa mundi interactivo**: el usuario selecciona un país y una década para escuchar canciones originarias de ese lugar y momento, simulando la experiencia de la radio local de la época. La biblioteca es **colaborativa** — todas las canciones las suben los propios usuarios.
+
+---
 
 ## 1. Idea de proyecto
 
-Este proyecto consiste en el desarrollo de una aplicación de música que funciona como una **“radio temporal”** basada en un **mapa mundi interactivo**. El usuario podrá seleccionar un país y un año concreto para escuchar canciones originarias de ese lugar y momento histórico, simulando la experiencia de escuchar la radio local de esa época.
+A diferencia de plataformas tradicionales de streaming como Spotify o Apple Music, donde el contenido proviene de discográficas, esta aplicación funciona como una **biblioteca musical colaborativa** construida por la comunidad.
 
-A diferencia de plataformas tradicionales de streaming musical como Spotify o Apple Music, donde el contenido proviene principalmente de discográficas o distribuidoras, esta aplicación funcionará como una **biblioteca musical colaborativa** creada por los propios usuarios.
+Los usuarios pueden subir canciones y clasificarlas geográfica y temporalmente. Así se construye una base de datos musical global que permite descubrir música de diferentes culturas y épocas haciendo clic en un mapa.
 
-Los usuarios podrán subir canciones a la plataforma y añadir la información necesaria para clasificarlas correctamente dentro del sistema geográfico y temporal. De esta forma, la comunidad irá construyendo una base de datos musical global que permitirá descubrir música de diferentes culturas y épocas.
+Cada canción subida incluye:
 
-Cada canción subida deberá incluir:
-
-- Archivo de audio de la canción
-- Nombre de la canción
-- Nombre del artista
+- Archivo de audio (MP3, WAV…)
+- Título y artista
 - Año de publicación
-- País de origen
-- Imagen de portada
+- País de origen (código ISO-2)
+- Imagen de portada (opcional)
 
-Además, la aplicación incluirá funciones sociales que permitirán a los usuarios interactuar entre sí.
+La aplicación incluye funciones sociales:
 
-Los usuarios podrán:
-
-- Crear perfiles personales
-- Subir canciones
-- Dar likes a canciones
-- Escribir comentarios en las canciones
-- Ver qué canciones han subido otros usuarios
-
-El propósito principal del proyecto es crear una plataforma que permita **descubrir música de diferentes lugares y épocas del mundo**, fomentando la exploración cultural y el descubrimiento musical a través de la comunidad.
-
-El público objetivo incluye:
-
-- Personas interesadas en descubrir música de diferentes culturas
-- Usuarios que quieren escuchar música de épocas pasadas
-- Amantes de la música que buscan experiencias diferentes a las plataformas tradicionales
-- Usuarios que desean compartir música con la comunidad
-- Artistas poco conocidos que podran compartir su musica 
+- Perfiles personales editables (avatar + bio)
+- Subida de canciones con barra de progreso real
+- Likes a canciones
+- Comentarios con respuestas anidadas y likes (ordenados por popularidad)
+- Seguir / dejar de seguir usuarios
+- Feed personalizado de usuarios seguidos
+- Lista de canciones que me gustan
+- Perfiles públicos visitables
 
 ---
 
-# 2. Requisitos funcionales
+## 2. Stack tecnológico
+
+### Backend
+- **Node.js + Express**
+- **MongoDB Atlas** + Mongoose (base de datos en la nube)
+- **JWT** para autenticación (tokens de 7 días)
+- **bcryptjs** para hashing de contraseñas
+- **Cloudinary** + multer-storage-cloudinary (audio, portadas y avatares)
+- **helmet**, **cors**, **express-rate-limit**, **morgan** (seguridad y logging)
+
+### Frontend
+- **React 18** + **React Router 6**
+- **Vite** como bundler y dev server
+- **Leaflet** + GeoJSON público para el mapa mundi interactivo
+- CSS propio sin frameworks
+- i18n propio (español / inglés)
+
+### Almacenamiento multimedia
+- Todos los archivos (audio + imágenes) van a **Cloudinary**. El servidor no guarda nada localmente, lo que hace que el hosting funcione exactamente igual que en local.
+
+---
+
+## 3. Estructura del proyecto
+
+```
+radio-temporal-proyecto/
+├── .gitignore
+├── readme.md
+├── backend/
+│   ├── app.js               (servidor Express, conexión MongoDB, rutas)
+│   ├── package.json
+│   ├── nixpacks.toml        (config deploy Railway)
+│   ├── .env.example
+│   ├── middleware/
+│   │   └── auth.js          (auth + optionalAuth JWT)
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Song.js
+│   │   └── Comment.js       (con parentId para replies y likes)
+│   └── routes/
+│       ├── authRoutes.js
+│       ├── songRoutes.js    (canciones, likes, comentarios, replies)
+│       ├── userRoutes.js    (perfil, follow, liked, avatar)
+│       └── reportRoutes.js
+└── frontend/
+    ├── package.json
+    ├── vite.config.js
+    ├── nixpacks.toml        (config deploy Railway)
+    ├── index.html
+    └── src/
+        ├── main.jsx
+        ├── App.jsx
+        ├── styles.css
+        ├── api.js           (cliente fetch + XHR con progreso)
+        ├── i18n.js          (es / en)
+        ├── countries.js     (mapa código ISO → nombre)
+        ├── context/
+        │   ├── AuthContext.jsx
+        │   ├── PlayerContext.jsx  (cola, shuffle, loop, volumen)
+        │   └── ToastContext.jsx
+        ├── components/
+        │   ├── Navbar.jsx
+        │   ├── MiniPlayer.jsx
+        │   ├── FullPlayer.jsx   (player + comentarios con replies)
+        │   ├── WorldMap.jsx     (Leaflet, bounds, estilos por país)
+        │   ├── SongList.jsx
+        │   ├── SongMenu.jsx
+        │   ├── EditSongModal.jsx
+        │   └── icons.jsx
+        └── pages/
+            ├── Home.jsx         (mapa + selector de década + panel canciones)
+            ├── Login.jsx
+            ├── Register.jsx
+            ├── Upload.jsx       (drag & drop + progreso XHR)
+            ├── Profile.jsx      (perfil propio, editar bio/avatar, borrar canciones)
+            ├── PublicProfile.jsx
+            ├── Settings.jsx     (idioma, autoplay, loop)
+            ├── Search.jsx       (buscar canciones y usuarios)
+            ├── LikedSongs.jsx
+            ├── Feed.jsx
+            ├── Song.jsx
+            └── NotFound.jsx
+```
+
+---
+
+## 4. Funcionalidades implementadas
+
+### Mapa interactivo
+- Mapa mundi con Leaflet renderizado en pantalla completa
+- Países con música subida aparecen resaltados en verde oscuro
+- Click en un país → carga sus canciones agrupadas por década
+- Selector de década con flechas (← 1990s →), saltos de 10 en 10
+- Bounds fijos: no se puede arrastrar fuera del mapa
+- Buscador global arriba a la derecha con dropdown en tiempo real
+- Panel deslizable desde abajo con las canciones del país seleccionado
 
 ### Gestión de usuarios
-
-- El sistema debe permitir a los usuarios **registrarse en la plataforma**.
-- El sistema debe permitir a los usuarios **iniciar sesión y cerrar sesión**.
-- Cada usuario debe tener un **perfil personal**.
-
-El perfil de usuario debe mostrar:
-
-- Nombre de usuario
-- breve descripcion para presentarse o compartir redes
-- Foto de perfil
-- Lista de canciones subidas
-
----
+- Registro con validación en cliente y servidor
+- Login con JWT (7 días), persistido en localStorage
+- Perfil personal con avatar, bio, estadísticas (canciones / likes)
+- Editar bio y foto de perfil (sheet deslizable)
+- Perfiles públicos en `/u/:id`
+- Sistema follow / unfollow
 
 ### Subida de canciones
+- Drag & drop o selector de archivo para audio y portada
+- Validación de campos obligatorios en cliente y servidor
+- Límite de 30 MB por archivo
+- Barra de progreso real (XHR `upload.onprogress`)
+- Watchdog: si la subida no avanza en 30s, aborta con mensaje claro
+- El audio y la portada se guardan en Cloudinary (accesibles desde cualquier dispositivo)
 
-- Los usuarios deben poder **subir canciones a la plataforma**.
-- El sistema debe permitir subir un **archivo de audio**.
-- El usuario debe introducir la siguiente información al subir una canción:
+### Reproductor
+- Mini player persistente en la parte inferior
+- Player completo con portada, metadatos, barra de progreso clicable
+- Play / Pausa / Anterior / Siguiente
+- **Botón anterior**: si llevas más de 2 segundos → reinicia la canción; si menos → va a la anterior
+- Modo **shuffle** (aleatorio) y **loop** (bucle)
+- Control de volumen con slider vertical (click) y silenciar (doble click)
+- Autoplay y loop configurables en ajustes
+- `likedByMe` y `likesCount` sincronizados con el backend en tiempo real
 
-  - Nombre de la canción
-  - Nombre del artista
-  - Año de publicación
-  - País de origen
-  - Imagen de portada
+### Comentarios
+- Comentarios en el player completo, ordenados por número de likes (más popular arriba)
+- **Likes en comentarios** con toggle en tiempo real
+- **Respuestas anidadas** (un nivel): botón "Responder" abre input inline con `@usuario`
+- Mostrar / ocultar respuestas
+- Eliminar comentario propio
+- Denunciar comentarios de otros usuarios
 
-- El sistema debe almacenar la canción y asociarla al usuario que la subió.
-
----
-
-### Exploración por mapa y época
-
-- La aplicación debe mostrar un **mapa mundi interactivo**.
-- El usuario debe poder **seleccionar un país**.
-- El usuario debe poder **seleccionar un año**.
-- El sistema debe filtrar las canciones según el **país y la época seleccionada** y reproducir canciones que entren esos parametros.
-
----
-
-### Reproducción de música
-
-- El sistema debe permitir **reproducir canciones** dentro de la aplicación.
-- Las canciones deben reproducirse en **modo radio**, pasando automáticamente a la siguiente.
-- El usuario debe poder:
-
-  - Pausar la canción
-  - Cambiar a la siguiente canción
-  - Ver la información de la canción actual.
+### Social
+- Feed personalizado (`/feed`) con canciones de usuarios seguidos
+- Página "Me gusta" (`/liked`) con todas tus canciones likeadas
+- Búsqueda global de canciones y usuarios en `/search`
+- Enlace al perfil del autor desde el player y desde los comentarios
 
 ---
 
-### Sistema de interacción
+## 5. Instalación y ejecución en local
 
-**Likes**
+### Requisitos
+- Node.js 18+
+- Cuenta en MongoDB Atlas (tier gratuito suficiente)
+- Cuenta en Cloudinary (tier gratuito suficiente)
 
-- Los usuarios deben poder dar **likes** a las canciones.
-- Cada canción debe mostrar el **número total de likes recibidos**.
+### Pasos
 
-**Comentarios**
+```bash
+# 1. Clonar el repositorio
+git clone <url-del-repo>
+cd radio-temporal-proyecto
 
-- Los usuarios deben poder **añadir comentarios** en las canciones.
-- Los comentarios deben mostrarse públicamente para otros usuarios.
+# 2. Backend
+cd backend
+cp .env.example .env
+# Edita .env con tus credenciales (ver sección 6)
+npm install
+npm run dev
+# → Servidor en http://localhost:3001
 
----
-
-# 3. Mockup gráfico
-
-![alt text](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213131.png)
-
-![alt text](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213147.png)
-
-![alt text](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213203.png)
-
-![alt text](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213112.png)
-
-![alt text](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213104.png)
-
-![alt text](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213054.png)
-
-# 4. Arquitectura y tecnología
-
-La aplicación seguirá una arquitectura **cliente-servidor**, separando la interfaz del usuario, la lógica del sistema y el almacenamiento de datos.
-
-## Frontend
-
-El frontend será la parte visual de la aplicación con la que interactúan los usuarios.
-
-Tecnologías posibles:
-
-- **React**
-- **Vue.js**
-- **HTML, CSS y JavaScript**
-
-Funciones principales del frontend:
-
-- Mostrar el mapa interactivo
-- Reproducir canciones
-- Mostrar perfiles de usuario
-- Permitir subir canciones
-- Mostrar comentarios y likes
+# 3. Frontend (en otra terminal)
+cd frontend
+npm install
+npm run dev
+# → App en http://localhost:5173
+# El proxy de Vite redirige /api → localhost:3001 automáticamente
+```
 
 ---
 
-## Backend
+## 6. Variables de entorno (`backend/.env`)
 
-El backend gestionará la lógica del sistema y la comunicación con la base de datos.
+```env
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 
-Tecnologías posibles:
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/radio-temporal
 
-- **Node.js**
-- **Express**
-- **Python (Flask o Django)**
+JWT_SECRET=una_cadena_aleatoria_larga_y_segura
 
-Funciones principales del backend:
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
+CLOUDINARY_API_KEY=tu_api_key
+CLOUDINARY_API_SECRET=tu_api_secret
+```
 
-- Autenticación de usuarios
-- Gestión de subida de canciones
-- Gestión de comentarios y likes
-- Filtrado de canciones por país y año
-- Comunicación con el frontend mediante una **API REST**
-
----
-
-## Base de datos
-
-La base de datos almacenará toda la información de la aplicación.
-
-Tecnologías posibles:
-
-- **PostgreSQL**
-- **MongoDB**
-
-Datos almacenados:
-
-Usuarios
-
-- id
-- nombre de usuario
-- email
-- contraseña
-- foto de perfil
-
-Canciones
-
-- id
-- título
-- artista
-- año
-- país
-- portada
-- archivo de audio
-- usuario que la subió
-
-Interacciones
-
-- likes
-- comentarios
-- fecha de publicación
+> ⚠️ **Nunca subas `.env` al repositorio.** El `.gitignore` ya lo excluye. Si alguna credencial se filtró, rótala inmediatamente en Cloudinary y MongoDB Atlas.
 
 ---
 
-## Almacenamiento de archivos
+## 7. Deploy en Railway
 
-Los archivos de audio y las imágenes de portada pueden almacenarse utilizando:
+El proyecto está preparado para desplegarse en [Railway](https://railway.app) como dos servicios independientes.
 
-- **AWS S3**
-- **Firebase Storage**
-- **Cloudinary**
+### Backend
+- Root directory: `backend`
+- Variables de entorno: las mismas que el `.env` local más `FRONTEND_URL` con la URL del frontend en Railway
 
-Esto permitirá guardar archivos multimedia de forma segura y escalable.
+### Frontend
+- Root directory: `frontend`
+- Variable de entorno: `VITE_API_URL=https://tu-backend.up.railway.app/api`
+
+Consulta el paso a paso completo en la guía de deploy incluida en el repositorio.
+
+---
+
+## 8. Endpoints principales de la API
+
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| POST | `/api/auth/register` | No | Crear cuenta (devuelve token) |
+| POST | `/api/auth/login` | No | Iniciar sesión |
+| GET | `/api/songs` | Opcional | Listar canciones (filtros: `country`, `decade`, `q`, `sort`) |
+| POST | `/api/songs` | Sí | Subir canción (multipart) |
+| GET | `/api/songs/feed` | Sí | Canciones de usuarios seguidos |
+| GET | `/api/songs/:id` | Opcional | Detalle de canción |
+| PUT | `/api/songs/:id` | Sí | Editar canción propia |
+| POST | `/api/songs/:id/like` | Sí | Toggle like |
+| GET | `/api/songs/:id/comments` | No | Listar comentarios (con replies y likes) |
+| POST | `/api/songs/:id/comments` | Sí | Crear comentario o reply (`parentId`) |
+| POST | `/api/songs/:id/comments/:cid/like` | Sí | Toggle like en comentario |
+| DELETE | `/api/songs/:id/comments/:cid` | Sí | Borrar comentario propio |
+| GET | `/api/users/me` | Sí | Mi perfil + mis canciones |
+| PUT | `/api/users/me` | Sí | Actualizar bio y avatar |
+| GET | `/api/users/me/liked` | Sí | Mis canciones con like |
+| DELETE | `/api/users/me/songs/:id` | Sí | Borrar canción propia |
+| GET | `/api/users?q=` | No | Buscar usuarios |
+| GET | `/api/users/:id` | No | Perfil público |
+| POST | `/api/users/:id/follow` | Sí | Toggle follow |
+| GET | `/api/health` | No | Healthcheck |
+
+---
+
+## 9. Capturas de pantalla
+
+![Mapa principal](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213131.png)
+![Panel de canciones](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213147.png)
+![Player completo](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213203.png)
+![Subida de canción](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213112.png)
+![Perfil de usuario](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213104.png)
+![Registro](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213054.png)

@@ -1,0 +1,138 @@
+/* ===== CONTROL DE VOLUMEN — FullPlayer ===== */
+
+.volume-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Botón icono de volumen */
+.btn-volume {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  border-radius: 50%;
+  transition: color .15s, background .15s;
+  flex-shrink: 0;
+}
+.btn-volume:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, .08);
+}
+.btn-volume svg { width: 22px; height: 22px; }
+
+/* Popup flotante con el slider vertical */
+.volume-slider-box {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 12px 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 1100;
+  min-width: 44px;
+}
+
+/* Flecha decorativa apuntando al botón */
+.volume-slider-box::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: var(--bg3);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Porcentaje en texto */
+.volume-pct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  user-select: none;
+  letter-spacing: .3px;
+}
+
+/* ── Slider vertical ── */
+.volume-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: slider-vertical;
+  appearance: auto;
+  width: 4px;
+  height: 96px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  padding: 0;
+  accent-color: var(--accent);
+  background: transparent;
+}
+
+/* Chrome / Safari thumb */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+  cursor: grab;
+  margin-left: -6px;
+  transition: background .1s, transform .1s;
+}
+.volume-slider:active::-webkit-slider-thumb,
+.volume-slider:hover::-webkit-slider-thumb {
+  background: var(--accent);
+  transform: scale(1.2);
+  cursor: grabbing;
+}
+
+/* Chrome / Safari track */
+.volume-slider::-webkit-slider-runnable-track {
+  background: var(--bg4);
+  border-radius: 2px;
+  width: 4px;
+}
+
+/* Firefox thumb */
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+  cursor: grab;
+  transition: background .1s;
+}
+.volume-slider:active::-moz-range-thumb,
+.volume-slider:hover::-moz-range-thumb {
+  background: var(--accent);
+  cursor: grabbing;
+}
+
+/* Firefox track */
+.volume-slider::-moz-range-track {
+  width: 4px;
+  background: var(--bg4);
+  border-radius: 2px;
+}
+.volume-slider::-moz-range-progress {
+  background: var(--accent);
+  border-radius: 2px;
+}
