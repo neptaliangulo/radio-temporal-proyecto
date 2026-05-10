@@ -267,9 +267,26 @@ Consulta el paso a paso completo en la guía de deploy incluida en el repositori
 
 ## 9. Capturas de pantalla
 
-![Mapa principal](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213131.png)
-![Panel de canciones](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213147.png)
-![Player completo](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213203.png)
-![Subida de canción](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213112.png)
-![Perfil de usuario](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213104.png)
-![Registro](imagenes-readme/Captura%20de%20pantalla%202026-03-15%20213054.png)
+### Mapa principal
+![Mapa principal](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191344.png)
+
+### País seleccionado con canciones agrupadas por década
+![País seleccionado](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191519.png)
+
+### Player completo con comentarios y respuestas
+![Player completo](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191449.png)
+
+### Subida de canción
+![Subida de canción](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191408.png)
+
+### Perfil de usuario
+![Perfil de usuario](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191418.png)
+
+### Buscador
+![Buscador](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191354.png)
+
+### Ajustes
+![Ajustes](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191428.png)
+
+### Login
+![Login](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191540.png)
