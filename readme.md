@@ -170,7 +170,203 @@ radio-temporal-proyecto/
 
 ---
 
-## 5. Instalación y ejecución en local
+## 5. Diagramas UML
+
+### 5.1 Diagrama de clases
+
+```mermaid
+classDiagram
+    class User {
+        +ObjectId _id
+        +String username
+        +String email
+        +String password
+        +String bio
+        +String avatar
+        +ObjectId[] followers
+        +ObjectId[] following
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Song {
+        +ObjectId _id
+        +String title
+        +String artist
+        +Number year
+        +String country
+        +String audioUrl
+        +String coverUrl
+        +ObjectId uploadedBy
+        +ObjectId[] likes
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Comment {
+        +ObjectId _id
+        +ObjectId song
+        +ObjectId user
+        +String text
+        +ObjectId[] likes
+        +ObjectId parentId
+        +String replyTo
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Report {
+        +ObjectId _id
+        +String type
+        +ObjectId targetId
+        +String reason
+        +ObjectId reportedBy
+        +String status
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    User "1" --> "0..*" Song : sube
+    User "0..*" --> "0..*" User : sigue
+    User "0..*" --> "0..*" Song : da like
+    Song "1" --> "0..*" Comment : tiene
+    User "1" --> "0..*" Comment : escribe
+    User "0..*" --> "0..*" Comment : da like
+    Comment "0..1" --> "0..*" Comment : parentId (reply)
+    User "1" --> "0..*" Report : reportedBy
+```
+
+### 5.2 Diagrama de secuencia — Autenticación (Login)
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant Frontend
+    participant Backend
+    participant MongoDB
+
+    Usuario->>Frontend: Introduce email y contraseña
+    Frontend->>Backend: POST /api/auth/login { email, password }
+    Backend->>MongoDB: User.findOne({ email })
+    MongoDB-->>Backend: Documento User (con password hash)
+    Backend->>Backend: bcrypt.compare(password, hash)
+    alt Credenciales correctas
+        Backend->>Backend: jwt.sign({ id }, SECRET, 7d)
+        Backend-->>Frontend: 200 { token, user }
+        Frontend->>Frontend: Guarda token en localStorage
+        Frontend-->>Usuario: Redirige a Home
+    else Credenciales incorrectas
+        Backend-->>Frontend: 400 { message: "Credenciales incorrectas" }
+        Frontend-->>Usuario: Muestra mensaje de error
+    end
+```
+
+### 5.3 Diagrama de secuencia — Subida de canción
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant Frontend
+    participant Backend
+    participant Cloudinary
+    participant MongoDB
+
+    Usuario->>Frontend: Selecciona audio + portada + metadatos
+    Frontend->>Frontend: Valida campos obligatorios
+    Frontend->>Backend: POST /api/songs (multipart/form-data) + Bearer token
+    Backend->>Backend: auth middleware — verifica JWT
+    Backend->>Cloudinary: Sube audio (multer-storage-cloudinary)
+    Cloudinary-->>Backend: audioUrl
+    Backend->>Cloudinary: Sube portada (si existe)
+    Cloudinary-->>Backend: coverUrl
+    Backend->>MongoDB: Song.create({ title, artist, year, country, audioUrl, coverUrl, uploadedBy })
+    MongoDB-->>Backend: Documento Song creado
+    Backend-->>Frontend: 201 { song }
+    Frontend-->>Usuario: Toast "Canción subida" + redirige
+```
+
+---
+
+## 6. Diagrama Entidad-Relación (ER)
+
+```mermaid
+erDiagram
+    USER {
+        ObjectId _id PK
+        String username
+        String email
+        String password
+        String bio
+        String avatar
+        Date createdAt
+        Date updatedAt
+    }
+
+    SONG {
+        ObjectId _id PK
+        String title
+        String artist
+        Number year
+        String country
+        String audioUrl
+        String coverUrl
+        ObjectId uploadedBy FK
+        Date createdAt
+        Date updatedAt
+    }
+
+    COMMENT {
+        ObjectId _id PK
+        ObjectId song FK
+        ObjectId user FK
+        String text
+        ObjectId parentId FK
+        String replyTo
+        Date createdAt
+        Date updatedAt
+    }
+
+    REPORT {
+        ObjectId _id PK
+        String type
+        ObjectId targetId
+        String reason
+        String status
+        ObjectId reportedBy FK
+        Date createdAt
+        Date updatedAt
+    }
+
+    USER_FOLLOWERS {
+        ObjectId userId FK
+        ObjectId followerId FK
+    }
+
+    SONG_LIKES {
+        ObjectId songId FK
+        ObjectId userId FK
+    }
+
+    COMMENT_LIKES {
+        ObjectId commentId FK
+        ObjectId userId FK
+    }
+
+    USER ||--o{ SONG : "sube"
+    USER ||--o{ COMMENT : "escribe"
+    USER ||--o{ REPORT : "reporta"
+    SONG ||--o{ COMMENT : "tiene"
+    COMMENT ||--o{ COMMENT : "reply a (parentId)"
+    USER ||--o{ USER_FOLLOWERS : "sigue / es seguido"
+    SONG ||--o{ SONG_LIKES : "recibe likes"
+    USER ||--o{ SONG_LIKES : "da like"
+    COMMENT ||--o{ COMMENT_LIKES : "recibe likes"
+    USER ||--o{ COMMENT_LIKES : "da like"
+```
+
+---
+
+## 7. Instalación y ejecución en local
 
 ### Requisitos
 - Node.js 18+
@@ -187,7 +383,7 @@ cd radio-temporal-proyecto
 # 2. Backend
 cd backend
 cp .env.example .env
-# Edita .env con tus credenciales (ver sección 6)
+# Edita .env con tus credenciales (ver sección 8)
 npm install
 npm run dev
 # → Servidor en http://localhost:3001
@@ -202,7 +398,7 @@ npm run dev
 
 ---
 
-## 6. Variables de entorno (`backend/.env`)
+## 8. Variables de entorno (`backend/.env`)
 
 ```env
 PORT=3001
@@ -222,7 +418,7 @@ CLOUDINARY_API_SECRET=tu_api_secret
 
 ---
 
-## 7. Deploy en Railway
+## 9. Deploy en Railway
 
 El proyecto está preparado para desplegarse en [Railway](https://railway.app) como dos servicios independientes.
 
@@ -238,7 +434,7 @@ Consulta el paso a paso completo en la guía de deploy incluida en el repositori
 
 ---
 
-## 8. Endpoints principales de la API
+## 10. Endpoints principales de la API
 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
@@ -263,9 +459,87 @@ Consulta el paso a paso completo en la guía de deploy incluida en el repositori
 | POST | `/api/users/:id/follow` | Sí | Toggle follow |
 | GET | `/api/health` | No | Healthcheck |
 
+### Formato de datos intercambiados
+
+**Registro / Login — respuesta:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "664f1a2b3c4d5e6f7a8b9c0d",
+    "username": "johndoe",
+    "avatar": "https://res.cloudinary.com/..."
+  }
+}
+```
+
+**Canción — respuesta:**
+```json
+{
+  "_id": "664f1a2b3c4d5e6f7a8b9c0e",
+  "title": "La Bamba",
+  "artist": "Ritchie Valens",
+  "year": 1958,
+  "country": "MX",
+  "audioUrl": "https://res.cloudinary.com/.../audio.mp3",
+  "coverUrl": "https://res.cloudinary.com/.../cover.jpg",
+  "uploadedBy": { "_id": "...", "username": "johndoe", "avatar": "..." },
+  "likes": ["664f...", "664f..."],
+  "likesCount": 2,
+  "likedByMe": true,
+  "createdAt": "2026-05-01T10:00:00.000Z"
+}
+```
+
+**Comentario — respuesta:**
+```json
+{
+  "_id": "664f1a2b3c4d5e6f7a8b9c0f",
+  "song": "664f1a2b3c4d5e6f7a8b9c0e",
+  "user": { "_id": "...", "username": "johndoe", "avatar": "..." },
+  "text": "Qué temazo",
+  "likes": [],
+  "likedByMe": false,
+  "parentId": null,
+  "replyTo": "",
+  "replies": [],
+  "createdAt": "2026-05-01T11:00:00.000Z"
+}
+```
+
 ---
 
-## 9. Capturas de pantalla
+## 11. Dependencias
+
+### Backend
+| Paquete | Versión | Uso |
+|---|---|---|
+| express | ^4.18.2 | Framework HTTP |
+| mongoose | ^7.6.0 | ODM para MongoDB |
+| jsonwebtoken | ^9.0.2 | Autenticación JWT |
+| bcryptjs | ^2.4.3 | Hash de contraseñas |
+| cloudinary | ^1.41.0 | Almacenamiento multimedia |
+| multer | ^1.4.5-lts.1 | Procesamiento multipart |
+| multer-storage-cloudinary | ^4.0.0 | Integración multer + Cloudinary |
+| cors | ^2.8.5 | Control de acceso cross-origin |
+| helmet | ^7.1.0 | Cabeceras de seguridad HTTP |
+| express-rate-limit | ^7.1.5 | Limitador de peticiones |
+| morgan | ^1.10.0 | Logger de peticiones HTTP |
+| dotenv | ^16.3.1 | Variables de entorno |
+
+### Frontend
+| Paquete | Versión | Uso |
+|---|---|---|
+| react | ^18.3.1 | Librería UI |
+| react-dom | ^18.3.1 | Renderizado en el DOM |
+| react-router-dom | ^6.26.0 | Enrutamiento SPA |
+| leaflet | ^1.9.4 | Mapa mundi interactivo |
+| vite | ^5.4.0 | Bundler y dev server |
+| @vitejs/plugin-react | ^4.3.1 | Plugin React para Vite |
+
+---
+
+## 12. Capturas de pantalla
 
 ### Mapa principal
 ![Mapa principal](imagenes-readme/Captura%20de%20pantalla%202026-05-10%20191344.png)
